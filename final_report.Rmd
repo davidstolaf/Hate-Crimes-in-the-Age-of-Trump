@@ -8,6 +8,10 @@ editor_options:
   chunk_output_type: console
 ---
 
+# Hate Crimes in the Age of Trump
+
+## Ella Koenig and David McGowan
+
 ```{r setup, include = FALSE}
 #getting things set up - what fun!
 
@@ -177,12 +181,6 @@ hist(residuals(hatecrimes14), breaks = 30, cex.main=1.25, main = "Histogram of R
 ```
 
 From examining the residual plot from our model, it was clear that the residuals follow a normal distribution, thus a linear model was appropriate, as the residuals showed no form.  We were slightly concerned about the equal variance assumption, but felt that a multilevel modeling structure was appropriate nonetheless. Our model was only able to account for about 43% of the variation in our data, and so there are many other variables that could play into the rate at which hate crimes are committed. From our model, we saw that in the average state, an increase of \$1,000 in median household income is associated with a predicted increase in 0.057 hate crimes per 100,000 population after accounting for income inequality and the percentage of population that is nonwhite. Further, an increase in 0.01 points on the Gini index is associated with a predicted increase of 0.319 hate crimes per 100,000 population after accounting for the median household income and the percentage of the population that is nonwhite. 
-
-\newpage
-
-## Response to Peer Review
-
-After receiving comments from our peer review partner, we learned that we were in a pretty solid spot for revisions. We found that a couple of our interpretations of sigificant predictors could be expanded on to tell a better story about our data, and so we reevaluated our interpretations to provide new insight. We also received feedback on how to make our paper look more professional in plots, and we edited those to improve their appearance. We found the peer review helpful as our partner reassured us that our report was accessible to a general audience. Overall, peer review was helpful, we really enjoyed getting to see someone else's work as that helped us more than the comments on our own paper. Due to the stage that we were at in our writing process, looking at other work provided more insight than comments on our own. 
 
 \newpage
 

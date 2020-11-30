@@ -1,0 +1,518 @@
+---
+title: "Annotated Appendix"
+author: "Ella Koenig and David McGowan"
+date: "11/21/2020"
+output: md_document
+editor_options: 
+  chunk_output_type: console
+---
+
+![Variable dictionary.](~/Stats 316 F20/Project/David_Ella/variabledict.png)
+
+```{r setup, include = FALSE}
+#getting things set up - what fun!
+
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+library(mosaic)
+library(kableExtra)
+library(lme4)
+library(tidyverse)
+```
+
+
+```{r}
+# reading in our data
+
+hate_crimes <- read_csv("~/Stats 316 F20/Project/David_Ella/hatecrimesfull.csv")
+```
+
+```{r}
+# 5 number summaries for all numeric variables
+
+
+favstats(hate_crimes$Noncitizen)
+# median = 0.04, mean = 0.0485: there is a slight difference 
+#    between the median and mean, suggests that 
+#    the data might be slightly skewed
+
+favstats(hate_crimes$MedIncome)
+# This data doesn't appear to be skewed. 
+#    We should keep in mind that the medIncome 
+#    probably looks more similar within state to between state
+
+favstats(hate_crimes$Unemployed)
+# This data doesn't appear to be skewed
+# Note: these represent percentages, so min = 2.2% and max = 7.9%
+
+favstats(hate_crimes$White_Poverty)
+# No skew apparent from this summary
+
+favstats(hate_crimes$GINI2016)
+# No skew apparent from this summary
+
+favstats(hate_crimes$HS_Degree)
+# No skew apparent from this summary
+
+favstats(hate_crimes$share_voters_voted_trump)
+# Mean = median in this case!
+
+favstats(hate_crimes$hate_per)
+# Skewed data here: mean is 38% greater than the median
+```
+
+```{r}
+# table showing the distribution of unemployment for each year
+
+kable(table(hate_crimes$Year, cut_interval(hate_crimes$Unemployed, 5)))
+# The unemployment rate dropped significantly from 2014 to 2018
+```
+
+
+```{r fig.height = 2, fig.width = 3.34}
+# univariate histograms
+
+
+# histogram of state population share that is noncitizen
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = Noncitizen), bins = 20) +
+  labs(title = "Figure 1")
+# Noncitizen population share is concentrated largely below ~7%
+
+# histogram of state-wide median income
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = MedIncome), bins = 30) +
+  labs(title = "Figure 2")
+# Median income appears to somewhat follow a normal distribution
+
+# histogram of state population share that is nonwhite
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = Nonwhite), bins = 30) +
+  labs(title = "Figure 3")
+# Nonwhite population share is concentrated largely below 40%
+
+# histogram of state-wide unemployment rate
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = Unemployed), bins = 30) +
+  labs(title = "Figure 4")
+# Unemployment rate appears to somewhat follow a normal distribution
+
+# histogram of state-wide poverty rate among whites
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(White_Poverty), bins = 15) +
+  labs(title = "Figure 5")
+# Share of white population in poverty somewhat follows a normal distribution
+
+# histogram of state's GINI index
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = GINI2016), bins = 15) +
+  labs(title = "Figure 6")
+# GINI index is concentrated largely between 0.45 and 0.48
+
+# histogram of state share of population with HS degree
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = HS_Degree), bins = 25) +
+  labs(title = "Figure 7")
+# Population share with HS degree is slightly left skewed
+#   (but primarily constant across 80% to 92%)
+
+# histogram of trump's share of votes in state
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = share_voters_voted_trump), bins = 25) +
+  labs(title = "Figure 8")
+# One very low outlier for vote share for Trump 
+#    (that point is Washington DC)
+
+# histogram of number of hate crimes per 100k in state
+ggplot(data = hate_crimes) +
+  geom_histogram(aes(x = hate_per), bins = 20) +
+  labs(title = "Figure 9")
+# Values for hate crimes per 100k are mostly concentrated below 5
+#    but, several outlier points around 10, 18, 27, 30
+```
+
+
+```{r fig.height = 2, fig.width = 3.34}
+# bivariate scatterplots
+
+# scatterplot of state population share that is noncitizen by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = Noncitizen, y = hate_per)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 10")
+# slight positive relationship
+
+# scatterplot of median income by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = MedIncome, y = hate_per)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 11")
+# somewhat strong positive relationship
+
+# scatterplot of state population share that is nonwhite by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = Nonwhite, y = hate_per)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 12")
+# slight positive relationship
+
+# scatterplot of share of white population in poverty by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = White_Poverty, y = hate_per)) +
+  geom_point() +
+  geom_smooth(data = filter(hate_crimes, State != "District of Columbia"),
+              method = "lm") +
+  labs(title = "Figure 13")
+# slight negative relationship (but not much after removing DC)
+
+# scatterplot of state population share with HS degree by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = HS_Degree, y = hate_per)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 14")
+# basically no relationship
+
+# scatterplot of vote share for trump by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = share_voters_voted_trump, y = hate_per)) +
+  geom_point() +
+  geom_smooth(data = filter(hate_crimes, share_voters_voted_trump > 0.2), 
+              method = "lm") +
+  labs(title = "Figure 15")
+# not much of a relationship (after removing Washington DC from the smoother)
+
+# scatterplot of unemployment rate by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = Unemployed, y = hate_per)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 16")
+# slight positive relationship
+
+# scatterplot of GINI index by hate crimes per 100k
+ggplot(data = hate_crimes, aes(x = GINI2016, y = hate_per)) +
+  geom_point() +
+  geom_smooth(data= filter(hate_crimes, GINI2016 < 0.53),
+              method = "lm") +
+  labs(title = "Figure 17")
+# slight positive relationship (after removing Washington DC from the smoother)
+
+
+
+# scatterplot of unemployment rate by state median income
+ggplot(data = hate_crimes, aes(x = Unemployed, y = MedIncome)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 18")
+# strong negative relationship
+
+# scatterplot of pop share nonwhite by pop share noncitizen
+ggplot(data = hate_crimes, aes(x = Noncitizen, y = Nonwhite)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 19")
+# VERY strong positive relationship
+
+# scatterplot of HS degree attainment by share of white population in poverty
+ggplot(data = hate_crimes, aes(x = White_Poverty, y = HS_Degree)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 20")
+# VERY strong negative relationship
+
+# scatterplot of vote share for Trump by share of white population in poverty
+ggplot(data = hate_crimes, aes(x = White_Poverty, y = share_voters_voted_trump)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 21")
+# strong positive relationship
+
+# scatterplot of vote share for Trump by unemployment rate
+ggplot(data = hate_crimes, aes(x = Unemployed, y = share_voters_voted_trump)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Figure 22")
+# slight negative relationship
+```
+
+
+```{r}
+# get a random sample of 25 states to use for lattice plots
+#     so that they can not be overwhelming
+
+states <- as.data.frame(hate_crimes$State) %>%
+  group_by(hate_crimes$State) %>%
+  summarize()
+
+# `random` is a list of the sampled states
+
+random <-  sample_n(states, size = 25, replace = FALSE)
+
+# pulling the random sample of 25 states with all of their data
+
+random_hate_crimes <- hate_crimes %>%
+  filter(State %in% random$`hate_crimes$State`)
+```
+
+```{r}
+# lattice plots
+# we see correlation within states across years for the variables visualized here
+
+
+# histograms by state for percent noncitizen
+random_hate_crimes %>%
+  ggplot(aes(x = Noncitizen)) +
+  geom_histogram(bins = 30) + 
+  facet_wrap(~State) +
+  labs(title = "Figure 23")
+
+# histograms by state for median income
+random_hate_crimes %>%
+  ggplot(aes(x = MedIncome)) +
+  geom_histogram(bins = 30) + 
+  facet_wrap(~State) +
+  labs(title = "Figure 24")
+
+# histograms by state for percent nonwhite
+random_hate_crimes %>%
+  ggplot(aes(x = Nonwhite)) +
+  geom_histogram(bins = 30) + 
+  facet_wrap(~State) +
+  labs(title = "Figure 25")
+
+# histograms by state for unemployment rate
+random_hate_crimes %>%
+  ggplot(aes(x = Unemployed)) +
+  geom_histogram(bins = 30) + 
+  facet_wrap(~State) +
+  labs(title = "Figure 26")
+
+# histograms by state for white poverty rate
+random_hate_crimes %>%
+  ggplot(aes(x = White_Poverty)) +
+  geom_histogram(bins = 30) + 
+  facet_wrap(~State) +
+  labs(title = "Figure 27")
+
+# histograms by state for percent with HS degree
+random_hate_crimes %>%
+  ggplot(aes(x = HS_Degree)) +
+  geom_histogram(bins = 30) + 
+  facet_wrap(~State) +
+  labs(title = "Figure 28")
+
+# histograms by state for hate crimes per 100,000 population
+random_hate_crimes %>%
+  ggplot(aes(x = hate_per)) +
+  geom_histogram(bins = 30) + 
+  facet_wrap(~State) +
+  labs(title = "Figure 29")
+```
+
+```{r}
+# a spaghetti plot showing hate crimes per 100,000 population by year 
+#    with a line for each state. There is a clear outlier 
+#    and this is quite intriguing
+hate_crimes %>%
+  ggplot(aes(x = Year, y = hate_per, group = State)) +
+  geom_line() +
+  labs(title = "Figure 30")
+
+#Washington D.C. has crazy high numbers of hate crimes. 
+#    I wonder if this has to do with reporting or if it 
+#    has to do with population or what?
+hate_crimes %>%
+  filter(hate_per >= 10)
+
+#I refit the model but subset the data to remove D.C 
+#    so that we could perhaps see trends more clearly
+hate_crimes_state <- hate_crimes %>%
+  filter(State != "District of Columbia")
+
+hate_crimes_state %>%
+  ggplot(aes(x = Year, y = hate_per, group = State)) +
+  geom_line() +
+  labs(title = "Figure 31")
+#there isn't really any singular clear trend. 
+#    There are a couple of states that are relatively high, 
+#    but none that stand out clearly like D.C did
+```
+
+```{r}
+hate_crimes <- read_csv("~/Stats 316 F20/Project/David_Ella/hatecrimesfull.csv")
+
+hate2 <- hate_crimes %>%
+  filter(State != "District of Columbia") %>%
+  mutate(med1000 = MedIncome/1000,
+         med1000.2 = med1000 - mean(med1000))
+
+ggplot(hate2, aes(x = hate_per)) +
+  geom_histogram()
+
+null.model <- lmer(hate_per ~ 1 + (1|State), 
+                 data = hate2, REML = TRUE)
+
+summary(null.model)
+
+
+```
+
+From EDA, we see that median income, share of non-white, and share of non-citizen trend with hate crimes. Med inc is strongest. Unemployment rate a bit as well. Maybe GINI as well. Looking to find relationship with Trump votes
+
+```{r}
+hatecrimes1 <- lmer(hate_per ~ med1000.2 + (1|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes1)
+#residual variance of 0.5724
+
+hatecrimes2 <- lmer(hate_per ~ med1000.2 + share_voters_voted_trump + (1|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes2)
+#not the best - residual variance of 0.573
+
+hatecrimes3 <- lmer(hate_per ~ med1000.2 + share_voters_voted_trump + Nonwhite + (1|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes3)
+#looks fairly good - residual variance of 0.5736
+
+hatecrimes4 <- lmer(hate_per ~ med1000.2 + share_voters_voted_trump + Nonwhite + Noncitizen + (1|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes4)
+#maybe promising - residual variance of 0.5779
+
+hatecrimes5 <- lmer(hate_per ~ med1000.2 + share_voters_voted_trump + Nonwhite + (1 + Noncitizen|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes5)
+#intriguing - residual variance of 0.5422
+
+hatecrimes6 <- lmer(hate_per ~ med1000 + share_voters_voted_trump + (1 + Noncitizen|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes6)
+#not what we want - residual variance of 0.5471
+
+hatecrimes7 <- lmer(hate_per ~ med1000.2 + share_voters_voted_trump + Noncitizen + (1 + Nonwhite|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes7)
+# residual variance of 0.5729
+
+hatecrimes8 <- lmer(hate_per ~ med1000.2 + share_voters_voted_trump + (1 + White_Poverty|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes8)
+#residual variance of 0.4517
+
+hatecrimes9 <- lmer(hate_per ~ med1000.2 + GINI2016 + (1|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes9)
+
+hatecrimes10 <- lmer(hate_per ~ med1000.2 + GINI2016 + (1 + White_Poverty|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes10)
+
+hatecrimes11 <- lmer(hate_per ~ med1000.2 + GINI2016 + HS_Degree + (1|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes11)
+
+hatecrimes12 <- lmer(hate_per ~ med1000.2 + GINI2016 + (1 + Unemployed|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes12)
+
+hatecrimes13 <- lmer(hate_per ~ med1000.2 + GINI2016 + Noncitizen + (1 |State), data = hate2, REML = TRUE)
+
+summary(hatecrimes13)
+
+hatecrimes14 <- lmer(hate_per ~ med1000.2 + GINI2016 + Nonwhite + (1 |State), data = hate2, REML = TRUE)
+
+summary(hatecrimes14)
+#THIS IS OUR MODEL!!! HUZZAH!
+
+hatecrimes15 <- lmer(hate_per ~ med1000.2 + GINI2016 + Nonwhite + (1 + Noncitizen|State), data = hate2, REML = TRUE)
+
+summary(hatecrimes15)
+
+mean(hate2$med1000)
+```
+
+```{r}
+#plotting the residuals of our model to justify using a 
+#multi-level linear model instead of a poisson
+plot(hatecrimes14)
+hist(residuals(hatecrimes14), breaks = 30)
+```
+
+```{r}
+#creating a data.frame of fixed effects coefficients
+Variable <- c("Intercept", "med1000.2", "GINI2016", "Nonwhite")
+Estimate <- c(-11.76299, 0.05708, 31.94519, -3.86226)
+Std.Error <- c(4.58138, 0.01304, 10.12394, 1.19606)
+t.value <- c(-2.568, 4.378, 3.155, -3.229)
+
+fixed.effects <- data.frame(Variable, Estimate, Std.Error, t.value)
+
+kable(fixed.effects, caption = "Table of Parameter Estimates")
+```
+
+```{r, include = FALSE}
+#creating a table of summary statistics for several key variables
+medinc <- as_tibble(favstats(hate2$med1000)) %>%
+  mutate(Variable = "med1000")
+
+GINI <- as_tibble(favstats(hate2$GINI2016)) %>%
+  mutate(Variable = "GINI2016")
+
+unemployment <- as_tibble(favstats(hate2$Unemployed)) %>%
+  mutate(Variable = "Unemployed")
+
+trump_share <- as_tibble(favstats(hate2$share_voters_voted_trump)) %>%
+  mutate(Variable = "share_voters_voted_trump")
+
+hate.per <- as_tibble(favstats(hate2$hate_per)) %>%
+  mutate(Variable = "hate_per")
+
+summary_stats <- rbind(hate.per, medinc, trump_share, GINI, unemployment) %>%
+  dplyr::select(Variable, min, Q1, median, Q3, max, mean, sd, n)
+
+#table of summary stats
+kable(summary_stats, caption = "Summary Statistics of Key Variables")
+```
+
+
+Coefficient Interpretation:
+
+Intercept = -11.782
+med1000.2 = 0.057
+GINI2016 = 31.945
+Nonwhite = -3.862
+
+Intercept -> For the average state with a median household income of $61,373, no income inequality, and where the entire population is white, we predict that there will be -11.782 hate crimes per 100,000 population. 
+
+med1000.2 -> For the average state, we predict that an increase of \$1,000 in median household income is associated with an increase in 0.057 hate crimes per 100,000 population after accounting for income inequality and the percentage of the population that is nonwhite. 
+
+GINI2016 -> For the average state, we predict that an increase in 0.01 points on the GINI index is associated with an increase of 0.319 hate crimes per 100,000 population after accounting for the median household income and the percentage of the population that is nonwhite. 
+
+Nonwhite -> For the average state, we predict that an increase in 1 percentage point of population that is nonwhite is associated with a decrease of 0.039 hate crimes per 100,000 population after accounting for median household income and income inequality. 
+
+```{r}
+#finding basic counts distributions for hate crimes by year, and other factors
+
+hate2 %>%
+  ggplot(aes(x = hate_per)) +
+  geom_histogram()
+
+hate_group <- hate2 %>%
+  group_by(Year) %>%
+  summarize(hate_per2 = mean(hate_per))
+
+hate_counts <- hate_crimes %>%
+  group_by(Year) %>%
+  summarize(Total_Hate_Crimes2 = sum(Total_Hate_Crimes))
+
+
+hate_counts %>%
+  ggplot(aes(x = Year, y = Total_Hate_Crimes2)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Year", title = "Figure 32 Total Hate Crimes by Year", y = " ")
+
+hate_group %>%
+  ggplot(aes(x = Year, y = hate_per2)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Year", title = "Figure 33: Hate Crime Rate by Year", y = "")
+```
+

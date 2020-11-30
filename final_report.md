@@ -1,3 +1,9 @@
+Hate Crimes in the Age of Trump
+===============================
+
+Ella Koenig and David McGowan
+-----------------------------
+
 Hate crimes target people for their identity, whether for their race,
 religion, sexuality, ability, or other similar attribute. Concerningly,
 the annual number of hate crimes in the United States has increased in
@@ -469,22 +475,6 @@ is nonwhite. Further, an increase in 0.01 points on the Gini index is
 associated with a predicted increase of 0.319 hate crimes per 100,000
 population after accounting for the median household income and the
 percentage of the population that is nonwhite.
-
-Response to Peer Review
------------------------
-
-After receiving comments from our peer review partner, we learned that
-we were in a pretty solid spot for revisions. We found that a couple of
-our interpretations of sigificant predictors could be expanded on to
-tell a better story about our data, and so we reevaluated our
-interpretations to provide new insight. We also received feedback on how
-to make our paper look more professional in plots, and we edited those
-to improve their appearance. We found the peer review helpful as our
-partner reassured us that our report was accessible to a general
-audience. Overall, peer review was helpful, we really enjoyed getting to
-see someone else’s work as that helped us more than the comments on our
-own paper. Due to the stage that we were at in our writing process,
-looking at other work provided more insight than comments on our own.
 
 References
 ----------
