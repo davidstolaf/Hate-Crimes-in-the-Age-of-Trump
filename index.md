@@ -1,9 +1,3 @@
-Hate Crimes in the Age of Trump
-===============================
-
-Ella Koenig and David McGowan
------------------------------
-
 Hate crimes target people for their identity, whether for their race,
 religion, sexuality, ability, or other similar attribute. Concerningly,
 the annual number of hate crimes in the United States has increased in
